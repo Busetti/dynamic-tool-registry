@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: tool-registry-backend
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/toolregistry}
+      auto-index-creation: false
+  ai:
+    mcp:
+      server:
+        name: dynamic-tool-registry
+        version: 1.0.0
+        type: SYNC
+        instructions: >-
+          Dynamic Tool Registry - a central catalog of organization APIs exposed as AI tools.
+          Tools are registered at runtime with rich business context; call tools/list to discover them.
+        capabilities:
+          tool: true
+          resource: false
+          prompt: false
+          completion: false
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
+tool-registry:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+  invoker:
+    http:
+      default-timeout-ms: 10000
+      max-response-bytes: 1048576
+  ssrf:
+    enabled: ${SSRF_GUARD_ENABLED:true}
+    trusted-hosts: ${SSRF_TRUSTED_HOSTS:localhost,127.0.0.1,host.docker.internal}
+
+logging:
+  level:
+    com.appworks.toolregistry: INFO
+    io.modelcontextprotocol: INFO

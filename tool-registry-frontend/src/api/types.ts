@@ -1,0 +1,259 @@
+// TypeScript mirrors of the backend DTOs.
+
+export type ToolStatus = 'DRAFT' | 'ACTIVE' | 'DEPRECATED' | 'DISABLED';
+export type ToolType =
+  | 'HTTP'
+  | 'GRAPHQL'
+  | 'SOAP'
+  | 'GRPC'
+  | 'DB_QUERY'
+  | 'KAFKA'
+  | 'JAVA_FUNCTION'
+  | 'REMOTE_MCP';
+export type HttpMethod = 'GET' | 'POST';
+
+export interface Group {
+  id: string;
+  name: string;
+  mcpKey?: string | null;
+  mcpSseUrl?: string | null;
+  displayName: string;
+  description?: string;
+  businessArea?: string;
+  teamName?: string;
+  owner?: string;
+  tags: string[];
+  documentation?: string;
+  toolCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GroupRequest {
+  name: string;
+  displayName: string;
+  description?: string;
+  businessArea?: string;
+  teamName?: string;
+  owner?: string;
+  tags?: string[];
+  documentation?: string;
+}
+
+export interface ToolParameter {
+  name: string;
+  type?: 'string' | 'number' | 'integer' | 'boolean';
+  description?: string;
+  required?: boolean;
+  defaultValue?: string | null;
+  enumValues?: string[] | null;
+}
+
+export interface ToolHeader {
+  name: string;
+  value?: string;
+  description?: string;
+  required?: boolean;
+  sensitive?: boolean;
+}
+
+export interface HttpConfig {
+  method: HttpMethod;
+  uri: string;
+  contentType?: string;
+  timeoutMs?: number;
+  headers?: ToolHeader[];
+  queryParameters?: ToolParameter[];
+  pathVariables?: ToolParameter[];
+  bodyParameters?: ToolParameter[];
+  requestBodyTemplate?: string | null;
+}
+
+export interface ExternalLink {
+  title: string;
+  url: string;
+}
+
+export interface Documentation {
+  markdown?: string;
+  swaggerUrl?: string;
+  externalLinks?: ExternalLink[];
+  notes?: string;
+}
+
+export interface RequestExample {
+  name: string;
+  description?: string;
+  arguments?: Record<string, unknown>;
+}
+
+export interface ResponseExample {
+  name: string;
+  statusCode?: number;
+  body?: string;
+}
+
+export interface ToolExamples {
+  requestExamples?: RequestExample[];
+  responseExamples?: ResponseExample[];
+  responseSchema?: string | null;
+}
+
+export interface AiContext {
+  naturalLanguageDescription?: string;
+  useCases?: string[];
+  expectedInputs?: string;
+  expectedOutputs?: string;
+  examplePrompts?: string[];
+  keywords?: string[];
+  businessDomain?: string;
+  searchAliases?: string[];
+}
+
+export interface Tool {
+  id: string;
+  toolName: string;
+  displayName: string;
+  description: string;
+  businessPurpose?: string;
+  businessCapability?: string;
+  category?: string;
+  tags: string[];
+  version?: string;
+  status: ToolStatus;
+  groupIds: string[];
+  toolType: ToolType;
+  httpConfig?: HttpConfig;
+  documentation?: Documentation;
+  examples?: ToolExamples;
+  aiContext?: AiContext;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ToolRequest {
+  toolName: string;
+  displayName: string;
+  description: string;
+  businessPurpose?: string;
+  businessCapability?: string;
+  category?: string;
+  tags?: string[];
+  version?: string;
+  groupIds?: string[];
+  toolType?: ToolType;
+  httpConfig: HttpConfig;
+  documentation?: Documentation;
+  examples?: ToolExamples;
+  aiContext?: AiContext;
+}
+
+export interface ToolSummary {
+  id: string;
+  toolName: string;
+  displayName: string;
+  description: string;
+  category?: string;
+  tags: string[];
+  version?: string;
+  status: ToolStatus;
+  groupIds: string[];
+  toolType: ToolType;
+  method?: HttpMethod;
+  uri?: string;
+  updatedAt: string;
+}
+
+export interface PageResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface ToolListFilters {
+  status?: string;
+  groupId?: string;
+  category?: string;
+  tag?: string;
+  toolType?: string;
+  search?: string;
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+export interface InvocationResult {
+  success: boolean;
+  statusCode?: number | null;
+  durationMs: number;
+  resolvedUri?: string | null;
+  method?: string | null;
+  requestHeaders?: Record<string, string> | null;
+  requestBody?: string | null;
+  responseHeaders?: Record<string, string> | null;
+  responseBody?: string | null;
+  error?: string | null;
+}
+
+export interface ConnectionTestResult {
+  reachable: boolean;
+  statusCode?: number | null;
+  latencyMs: number;
+  message?: string;
+}
+
+export interface HealthCheckResult {
+  toolId: string;
+  toolName: string;
+  healthy: boolean;
+  statusCode?: number | null;
+  latencyMs: number;
+  message?: string;
+  checkedAt: string;
+}
+
+export interface McpStatus {
+  serverName: string;
+  serverVersion: string;
+  transport: string;
+  sseEndpoint: string;
+  registeredToolCount: number;
+  lastSyncAt?: string | null;
+}
+
+export interface RegisteredMcpTool {
+  name: string;
+  description?: string;
+  inputSchema?: string | null;
+}
+
+export interface ParsedCurl {
+  method: HttpMethod;
+  uri: string;
+  contentType?: string | null;
+  headers: { name: string; value: string; sensitive: boolean }[];
+  queryParameters: { name: string; type: string; defaultValue?: string | null; required: boolean }[];
+  bodyParameters: { name: string; type: string; defaultValue?: string | null; required: boolean }[];
+  requestBodyTemplate?: string | null;
+  warnings: string[];
+}
+
+export interface QuickRegisterRequest {
+  curl: string;
+  toolName: string;
+  displayName: string;
+  description: string;
+  businessPurpose?: string;
+  category?: string;
+  tags?: string[];
+  groupIds?: string[];
+}
+
+export interface ProblemDetail {
+  title?: string;
+  status?: number;
+  detail?: string;
+  violations?: string[];
+}

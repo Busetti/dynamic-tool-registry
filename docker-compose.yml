@@ -1,0 +1,45 @@
+# Local orchestration only — each project builds and deploys independently.
+services:
+  mongo:
+    image: mongo:7
+    container_name: toolregistry-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./tool-registry-backend
+    container_name: toolregistry-backend
+    ports:
+      - "8080:8080"
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/toolregistry
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173
+      SSRF_TRUSTED_HOSTS: localhost,127.0.0.1,host.docker.internal,mongo
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/8080' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  frontend:
+    build: ./tool-registry-frontend
+    container_name: toolregistry-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  mongo-data:
