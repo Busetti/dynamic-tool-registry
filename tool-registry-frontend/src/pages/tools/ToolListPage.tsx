@@ -7,6 +7,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import IconButton from '@mui/material/IconButton';
@@ -34,6 +35,7 @@ import type { ToolSummary } from '@/api/types';
 import PageHeader from '@/components/layout/PageHeader';
 import StatusChip from '@/components/common/StatusChip';
 import MethodChip from '@/components/common/MethodChip';
+import TokenWarningBadge from '@/components/common/TokenWarningBadge';
 import TagList from '@/components/common/TagList';
 import EmptyState from '@/components/common/EmptyState';
 import QuickRegisterDialog from '@/components/tools/QuickRegisterDialog';
@@ -76,9 +78,17 @@ export default function ToolListPage() {
         header: 'Tool',
         cell: (info) => (
           <Box sx={{ minWidth: 180 }}>
-            <Typography variant="body2" fontWeight={600}>
-              {info.getValue()}
-            </Typography>
+            <Stack direction="row" spacing={0.75} alignItems="center">
+              <Typography variant="body2" fontWeight={600}>
+                {info.getValue()}
+              </Typography>
+              {info.row.original.method === 'GET' && !info.row.original.limitEnabled && (
+                <TokenWarningBadge reason="No response limit configured — a large result list is sent to the model in full. Configure a limit or TOON in the tool's Technical settings." />
+              )}
+              {info.row.original.responseFormat === 'TOON' && (
+                <Chip label="TOON" size="small" color="success" variant="outlined" sx={{ height: 18, fontSize: 10 }} />
+              )}
+            </Stack>
             <Typography
               variant="caption"
               color="text.secondary"

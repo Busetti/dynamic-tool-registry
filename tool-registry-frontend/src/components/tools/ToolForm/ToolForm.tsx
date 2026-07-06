@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Alert from '@mui/material/Alert';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -88,6 +92,8 @@ export default function ToolForm({ initialValues, submitLabel, submitting, editM
   const { control, handleSubmit, trigger, watch, getValues } = methods;
 
   const method = watch('method');
+  const limitEnabled = watch('limitEnabled');
+  const paginated = watch('paginated');
 
   const goNext = async () => {
     const valid = await trigger(stepFields[activeStep]);
@@ -293,6 +299,126 @@ export default function ToolForm({ initialValues, submitLabel, submitting, editM
                       )}
                     />
                   </Grid>
+                  <Grid size={12}>
+                    <Divider sx={{ my: 1 }} />
+                    <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 0.5 }}>
+                      Response &amp; Tokens
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+                      Opt-in controls over what the AI model receives — TOON format and response limiting cut token
+                      cost. Measure the effect in the Playground.
+                    </Typography>
+                    <Grid container spacing={2.5}>
+                      <Grid size={{ xs: 12, md: 4 }}>
+                        <Controller
+                          name="responseFormat"
+                          control={control}
+                          render={({ field }) => (
+                            <TextField
+                              {...field}
+                              select
+                              label="Response format"
+                              fullWidth
+                              helperText="TOON is ~30-50% cheaper for uniform arrays"
+                            >
+                              <MenuItem value="JSON">JSON (default)</MenuItem>
+                              <MenuItem value="TOON">TOON — token-optimized</MenuItem>
+                            </TextField>
+                          )}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, md: 8 }}>
+                        <Controller
+                          name="limitEnabled"
+                          control={control}
+                          render={({ field }) => (
+                            <FormControlLabel
+                              control={<Switch checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+                              label="This API can return large / unbounded data — limit the response"
+                            />
+                          )}
+                        />
+                        {method === 'GET' && !limitEnabled && (
+                          <Alert severity="warning" icon={<WarningAmberIcon fontSize="small" />} sx={{ mt: 0.5 }}>
+                            Without a limit, a large result list is sent to the model in full and can waste thousands
+                            of tokens per call.
+                          </Alert>
+                        )}
+                      </Grid>
+                      {limitEnabled && (
+                        <>
+                          <Grid size={{ xs: 6, md: 3 }}>
+                            <Controller
+                              name="maxItems"
+                              control={control}
+                              render={({ field }) => (
+                                <TextField
+                                  {...field}
+                                  value={field.value ?? ''}
+                                  type="number"
+                                  label="Max items delivered"
+                                  fullWidth
+                                  helperText="Array responses are trimmed to this"
+                                />
+                              )}
+                            />
+                          </Grid>
+                          <Grid size={{ xs: 6, md: 3 }}>
+                            <Controller
+                              name="paginated"
+                              control={control}
+                              render={({ field }) => (
+                                <FormControlLabel
+                                  sx={{ mt: 1 }}
+                                  control={<Switch checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+                                  label="API supports pagination"
+                                />
+                              )}
+                            />
+                          </Grid>
+                          {paginated && (
+                            <>
+                              <Grid size={{ xs: 12, md: 2 }}>
+                                <Controller
+                                  name="limitParamName"
+                                  control={control}
+                                  render={({ field }) => (
+                                    <TextField {...field} label="Limit param" placeholder="limit" fullWidth />
+                                  )}
+                                />
+                              </Grid>
+                              <Grid size={{ xs: 12, md: 2 }}>
+                                <Controller
+                                  name="offsetParamName"
+                                  control={control}
+                                  render={({ field }) => (
+                                    <TextField {...field} label="Offset param" placeholder="offset" fullWidth />
+                                  )}
+                                />
+                              </Grid>
+                              <Grid size={{ xs: 12, md: 2 }}>
+                                <Controller
+                                  name="defaultLimit"
+                                  control={control}
+                                  render={({ field }) => (
+                                    <TextField
+                                      {...field}
+                                      value={field.value ?? ''}
+                                      type="number"
+                                      label="Default limit"
+                                      fullWidth
+                                      helperText="Injected when caller omits it"
+                                    />
+                                  )}
+                                />
+                              </Grid>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </Grid>
+                  </Grid>
+
                   {method === 'POST' && (
                     <Grid size={12}>
                       <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>

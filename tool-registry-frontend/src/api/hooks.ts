@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { groupsApi, mcpApi, testingApi, toolsApi } from './endpoints';
+import { groupsApi, mcpApi, playgroundApi, testingApi, toolsApi } from './endpoints';
 import type { GroupRequest, ToolListFilters, ToolRequest, ToolStatus } from './types';
 
 // ---- Groups ----
@@ -174,6 +174,31 @@ export function useToolHealth(id: string | undefined, enabled = false) {
     enabled: !!id && enabled,
     staleTime: 30_000,
   });
+}
+
+// ---- Playground ----
+
+export function usePlaygroundRun() {
+  return useMutation({
+    mutationFn: (body: { toolId: string; arguments?: Record<string, unknown>; formatOverride?: string }) =>
+      playgroundApi.run(body),
+  });
+}
+
+export function usePlaygroundAnalyze() {
+  return useMutation({ mutationFn: (toolIds: string[]) => playgroundApi.analyze(toolIds) });
+}
+
+export function usePlaygroundAnalyzeGroup() {
+  return useMutation({ mutationFn: (groupId: string) => playgroundApi.analyzeGroup(groupId) });
+}
+
+export function usePlaygroundRunBatch() {
+  return useMutation({ mutationFn: (toolIds: string[]) => playgroundApi.runBatch(toolIds) });
+}
+
+export function usePlaygroundRunBatchGroup() {
+  return useMutation({ mutationFn: (groupId: string) => playgroundApi.runBatchGroup(groupId) });
 }
 
 // ---- MCP ----

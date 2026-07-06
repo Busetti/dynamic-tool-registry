@@ -30,7 +30,9 @@ public class ToolTestingService {
 
     public ToolInvocationResult execute(String toolId, Map<String, Object> arguments) {
         Tool tool = toolService.getDomainById(toolId);
-        return invokerRegistry.getInvoker(tool.getToolType()).invoke(tool, arguments);
+        Map<String, Object> args =
+                com.appworks.toolregistry.application.response.ResponseProcessor.applyDefaultLimit(tool, arguments);
+        return invokerRegistry.getInvoker(tool.getToolType()).invoke(tool, args);
     }
 
     public ConnectionTestResult testConnection(String toolId) {

@@ -22,6 +22,7 @@ public record ToolResponse(
         List<String> groupIds,
         ToolType toolType,
         HttpConfigDto httpConfig,
+        ResponseControlDto responseControl,
         DocumentationDto documentation,
         ExamplesDto examples,
         AiContextDto aiContext,

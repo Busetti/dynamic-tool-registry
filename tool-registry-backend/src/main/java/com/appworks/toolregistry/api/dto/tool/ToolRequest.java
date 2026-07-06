@@ -54,6 +54,10 @@ public record ToolRequest(
         @NotNull @Valid
         HttpConfigDto httpConfig,
 
+        @Schema(description = "Opt-in token-efficiency controls (format, limiting)")
+        @Valid
+        ResponseControlDto responseControl,
+
         @Valid
         DocumentationDto documentation,
 

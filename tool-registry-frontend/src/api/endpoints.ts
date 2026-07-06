@@ -1,6 +1,9 @@
 import { apiClient } from './client';
 import type {
+  BatchRunReport,
   ConnectionTestResult,
+  ContextTaxReport,
+  PlaygroundRunReport,
   Group,
   GroupRequest,
   ParsedCurl,
@@ -64,6 +67,20 @@ export const testingApi = {
   testConnection: (id: string) =>
     apiClient.post<ConnectionTestResult>(`/tools/${id}/test-connection`).then((r) => r.data),
   health: (id: string) => apiClient.get<HealthCheckResult>(`/tools/${id}/health`).then((r) => r.data),
+};
+
+// Playground (token analysis)
+export const playgroundApi = {
+  run: (body: { toolId: string; arguments?: Record<string, unknown>; formatOverride?: string }) =>
+    apiClient.post<PlaygroundRunReport>('/playground/run', body).then((r) => r.data),
+  analyze: (toolIds: string[]) =>
+    apiClient.post<ContextTaxReport>('/playground/analyze', toolIds).then((r) => r.data),
+  analyzeGroup: (groupId: string) =>
+    apiClient.get<ContextTaxReport>(`/playground/analyze/group/${groupId}`).then((r) => r.data),
+  runBatch: (toolIds: string[]) =>
+    apiClient.post<BatchRunReport>('/playground/run-batch', toolIds).then((r) => r.data),
+  runBatchGroup: (groupId: string) =>
+    apiClient.post<BatchRunReport>(`/playground/run-batch/group/${groupId}`).then((r) => r.data),
 };
 
 // MCP registry

@@ -90,6 +90,7 @@ public class ToolService {
                 httpConfig,
                 null,
                 null,
+                null,
                 new com.appworks.toolregistry.api.dto.tool.AiContextDto(
                         request.description(), null, null, null, null, null, null, null));
 

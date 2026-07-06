@@ -13,6 +13,7 @@ import TestConsolePage from '@/pages/test/TestConsolePage';
 import GroupListPage from '@/pages/groups/GroupListPage';
 import GroupDetailPage from '@/pages/groups/GroupDetailPage';
 import McpRegistryPage from '@/pages/mcp/McpRegistryPage';
+import PlaygroundPage from '@/pages/playground/PlaygroundPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,6 +38,7 @@ export default function App() {
                   <Route path="/tools/:id/test" element={<TestConsolePage />} />
                   <Route path="/groups" element={<GroupListPage />} />
                   <Route path="/groups/:id" element={<GroupDetailPage />} />
+                  <Route path="/playground" element={<PlaygroundPage />} />
                   <Route path="/mcp" element={<McpRegistryPage />} />
                 </Route>
               </Routes>

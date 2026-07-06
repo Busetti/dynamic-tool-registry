@@ -19,6 +19,10 @@ public interface ToolMapper {
 
     @Mapping(target = "method", source = "httpConfig.method")
     @Mapping(target = "uri", source = "httpConfig.uri")
+    @Mapping(target = "responseFormat",
+            expression = "java(tool.getResponseControl() == null || tool.getResponseControl().getFormat() == null ? \"JSON\" : tool.getResponseControl().getFormat().name())")
+    @Mapping(target = "limitEnabled",
+            expression = "java(tool.getResponseControl() != null && tool.getResponseControl().isLimitEnabled())")
     ToolSummaryResponse toSummary(Tool tool);
 
     @Mapping(target = "id", ignore = true)

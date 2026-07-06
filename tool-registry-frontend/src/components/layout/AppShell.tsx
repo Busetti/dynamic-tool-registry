@@ -20,6 +20,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import BuildIcon from '@mui/icons-material/Build';
 import FolderIcon from '@mui/icons-material/Folder';
 import HubIcon from '@mui/icons-material/Hub';
+import ScienceIcon from '@mui/icons-material/Science';
 import SearchIcon from '@mui/icons-material/Search';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
@@ -33,6 +34,7 @@ const navItems = [
   { label: 'Dashboard', path: '/', icon: <DashboardIcon /> },
   { label: 'Tools', path: '/tools', icon: <BuildIcon /> },
   { label: 'Groups', path: '/groups', icon: <FolderIcon /> },
+  { label: 'Playground', path: '/playground', icon: <ScienceIcon /> },
   { label: 'MCP Registry', path: '/mcp', icon: <HubIcon /> },
 ];
 

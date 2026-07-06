@@ -124,6 +124,7 @@ export interface Tool {
   groupIds: string[];
   toolType: ToolType;
   httpConfig?: HttpConfig;
+  responseControl?: ResponseControl | null;
   documentation?: Documentation;
   examples?: ToolExamples;
   aiContext?: AiContext;
@@ -143,6 +144,7 @@ export interface ToolRequest {
   groupIds?: string[];
   toolType?: ToolType;
   httpConfig: HttpConfig;
+  responseControl?: ResponseControl | null;
   documentation?: Documentation;
   examples?: ToolExamples;
   aiContext?: AiContext;
@@ -161,6 +163,8 @@ export interface ToolSummary {
   toolType: ToolType;
   method?: HttpMethod;
   uri?: string;
+  responseFormat?: ResponseFormat;
+  limitEnabled?: boolean;
   updatedAt: string;
 }
 
@@ -227,6 +231,87 @@ export interface RegisteredMcpTool {
   name: string;
   description?: string;
   inputSchema?: string | null;
+}
+
+export type ResponseFormat = 'JSON' | 'TOON';
+
+export interface ResponseControl {
+  format?: ResponseFormat;
+  limitEnabled?: boolean;
+  maxItems?: number | null;
+  paginated?: boolean;
+  limitParamName?: string | null;
+  offsetParamName?: string | null;
+  defaultLimit?: number | null;
+}
+
+export interface PlaygroundRunReport {
+  toolId: string;
+  toolName: string;
+  success: boolean;
+  statusCode?: number | null;
+  durationMs: number;
+  deliveredFormat?: ResponseFormat;
+  responseJson?: string;
+  responseToon?: string;
+  tokensJson: number;
+  tokensToon: number;
+  tokensSaved: number;
+  savedPct: number;
+  definitionTokens: number;
+  sizeBytes: number;
+  originalItems: number;
+  deliveredItems: number;
+  truncated: boolean;
+  warning: boolean;
+  warningReason?: string | null;
+  tokenEncoding: string;
+  error?: string | null;
+}
+
+export interface ToolDefinitionCost {
+  toolId: string;
+  toolName: string;
+  displayName: string;
+  status: string;
+  descriptionTokens: number;
+  schemaTokens: number;
+  definitionTokens: number;
+}
+
+export interface BatchToolResult {
+  toolId: string;
+  toolName: string;
+  displayName: string;
+  executed: boolean;
+  skipReason?: string | null;
+  statusCode?: number | null;
+  durationMs: number;
+  deliveredFormat?: ResponseFormat | null;
+  responseTokens: number;
+  tokensJson: number;
+  tokensToon: number;
+  definitionTokens: number;
+  truncated: boolean;
+  warning: boolean;
+  warningReason?: string | null;
+}
+
+export interface BatchRunReport {
+  results: BatchToolResult[];
+  totalDefinitionTokens: number;
+  totalResponseTokens: number;
+  totalTokens: number;
+  toolCount: number;
+  executedCount: number;
+  tokenEncoding: string;
+}
+
+export interface ContextTaxReport {
+  tools: ToolDefinitionCost[];
+  totalDefinitionTokens: number;
+  toolCount: number;
+  tokenEncoding: string;
 }
 
 export interface ParsedCurl {

@@ -48,6 +48,15 @@ export const toolFormSchema = z.object({
   timeoutMs: z.coerce.number().min(100).max(120000),
   requestBodyTemplate: z.string().optional(),
 
+  // Step 2 — Response & Tokens (opt-in token-efficiency controls)
+  responseFormat: z.enum(['JSON', 'TOON']),
+  limitEnabled: z.boolean(),
+  maxItems: z.coerce.number().min(1).optional(),
+  paginated: z.boolean(),
+  limitParamName: z.string().optional(),
+  offsetParamName: z.string().optional(),
+  defaultLimit: z.coerce.number().min(1).optional(),
+
   // Step 3 — Parameters
   headers: z.array(headerSchema),
   pathVariables: z.array(parameterSchema),
@@ -91,6 +100,13 @@ export const emptyToolForm: ToolFormValues = {
   contentType: 'application/json',
   timeoutMs: 10000,
   requestBodyTemplate: '',
+  responseFormat: 'JSON',
+  limitEnabled: false,
+  maxItems: undefined,
+  paginated: false,
+  limitParamName: '',
+  offsetParamName: '',
+  defaultLimit: undefined,
   headers: [],
   pathVariables: [],
   queryParameters: [],
@@ -163,6 +179,18 @@ export function toToolRequest(values: ToolFormValues): ToolRequest {
       requestBodyTemplate:
         values.method === 'POST' && values.requestBodyTemplate ? values.requestBodyTemplate : null,
     },
+    responseControl:
+      values.responseFormat !== 'JSON' || values.limitEnabled || values.paginated
+        ? {
+            format: values.responseFormat,
+            limitEnabled: values.limitEnabled,
+            maxItems: values.limitEnabled ? values.maxItems ?? null : null,
+            paginated: values.paginated,
+            limitParamName: values.limitParamName || null,
+            offsetParamName: values.offsetParamName || null,
+            defaultLimit: values.defaultLimit ?? null,
+          }
+        : null,
     documentation: {
       markdown: values.docMarkdown || undefined,
       swaggerUrl: values.swaggerUrl || undefined,
@@ -215,6 +243,13 @@ export function fromTool(tool: Tool): ToolFormValues {
     contentType: http?.contentType ?? 'application/json',
     timeoutMs: http?.timeoutMs ?? 10000,
     requestBodyTemplate: http?.requestBodyTemplate ?? '',
+    responseFormat: (tool.responseControl?.format ?? 'JSON') as 'JSON' | 'TOON',
+    limitEnabled: tool.responseControl?.limitEnabled ?? false,
+    maxItems: tool.responseControl?.maxItems ?? undefined,
+    paginated: tool.responseControl?.paginated ?? false,
+    limitParamName: tool.responseControl?.limitParamName ?? '',
+    offsetParamName: tool.responseControl?.offsetParamName ?? '',
+    defaultLimit: tool.responseControl?.defaultLimit ?? undefined,
     headers: (http?.headers ?? []).map((h) => ({
       name: h.name,
       value: h.value ?? '',

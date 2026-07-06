@@ -1,6 +1,8 @@
 package com.appworks.toolregistry.mcp;
 
+import com.appworks.toolregistry.application.response.ResponseProcessor;
 import com.appworks.toolregistry.domain.model.AiContext;
+import com.appworks.toolregistry.domain.model.ResponseControl;
 import com.appworks.toolregistry.domain.model.HttpToolConfig;
 import com.appworks.toolregistry.domain.model.Tool;
 import com.appworks.toolregistry.domain.model.ToolParameter;
@@ -33,6 +35,7 @@ public class ToolDefinitionFactory {
 
     private final ObjectMapper objectMapper;
     private final ToolInvokerRegistry invokerRegistry;
+    private final ResponseProcessor responseProcessor;
 
     public McpServerFeatures.SyncToolSpecification createSpecification(Tool tool) {
         McpSchema.Tool mcpTool = new McpSchema.Tool(
@@ -46,10 +49,13 @@ public class ToolDefinitionFactory {
 
     private McpSchema.CallToolResult execute(Tool tool, java.util.Map<String, Object> arguments) {
         try {
+            java.util.Map<String, Object> args = ResponseProcessor.applyDefaultLimit(tool, arguments);
             ToolInvocationResult result = invokerRegistry.getInvoker(tool.getToolType())
-                    .invoke(tool, arguments);
+                    .invoke(tool, args);
             if (result.success()) {
-                String body = result.responseBody() == null ? "" : result.responseBody();
+                // Apply the tool's opt-in response controls (limit + TOON) to
+                // exactly what the model receives.
+                String body = responseProcessor.process(tool, result.responseBody()).body();
                 return new McpSchema.CallToolResult(List.of(new McpSchema.TextContent(body)), false);
             }
             String error = result.error() != null ? result.error()
@@ -83,7 +89,26 @@ public class ToolDefinitionFactory {
                 append(text, "Example prompts", String.join(" | ", context.getExamplePrompts()));
             }
         }
+        appendPaginationHint(text, tool);
         return text.toString();
+    }
+
+    /** Tells the model how to page a large-result tool, so it doesn't over-fetch. */
+    private void appendPaginationHint(StringBuilder text, Tool tool) {
+        ResponseControl control = tool.getResponseControl();
+        if (control == null || !control.isPaginated() || !StringUtils.hasText(control.getLimitParamName())) {
+            return;
+        }
+        StringBuilder hint = new StringBuilder("supports pagination via '")
+                .append(control.getLimitParamName()).append("'");
+        if (StringUtils.hasText(control.getOffsetParamName())) {
+            hint.append("/'").append(control.getOffsetParamName()).append("'");
+        }
+        if (control.getDefaultLimit() != null) {
+            hint.append("; returns up to ").append(control.getDefaultLimit())
+                    .append(" items by default — request more via these parameters");
+        }
+        append(text, "Pagination", hint.toString());
     }
 
     public String buildInputSchema(Tool tool) {

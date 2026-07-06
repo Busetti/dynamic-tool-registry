@@ -21,6 +21,8 @@ public record ToolSummaryResponse(
         ToolType toolType,
         String method,
         String uri,
+        String responseFormat,
+        boolean limitEnabled,
         Instant updatedAt
 ) {
 }

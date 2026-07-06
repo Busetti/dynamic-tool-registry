@@ -61,6 +61,9 @@ public class Tool {
 
     private HttpToolConfig httpConfig;
 
+    /** Opt-in token-efficiency controls (format, limiting). Null = raw JSON. */
+    private ResponseControl responseControl;
+
     private Documentation documentation;
 
     private ToolExamples examples;
