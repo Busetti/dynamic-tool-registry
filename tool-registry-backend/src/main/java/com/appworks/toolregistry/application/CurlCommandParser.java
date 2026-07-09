@@ -39,6 +39,7 @@ public class CurlCommandParser {
             String uri,
             String contentType,
             List<ParsedHeader> headers,
+            List<ParsedParameter> pathVariables,
             List<ParsedParameter> queryParameters,
             List<ParsedParameter> bodyParameters,
             String requestBodyTemplate,
@@ -134,6 +135,15 @@ public class CurlCommandParser {
                         values.isEmpty() ? null : values.get(0), false)));
         String baseUri = UriComponentsBuilder.fromUriString(url).replaceQuery(null).build().toUriString();
 
+        // {var} templates in the URL path become declared path variables,
+        // e.g. curl https://api.corp.com/users/{userId}
+        List<ParsedParameter> pathVariables = new ArrayList<>();
+        java.util.regex.Matcher pathVarMatcher =
+                java.util.regex.Pattern.compile("\\{([a-zA-Z][a-zA-Z0-9_]*)}").matcher(baseUri);
+        while (pathVarMatcher.find()) {
+            pathVariables.add(new ParsedParameter(pathVarMatcher.group(1), "string", null, true));
+        }
+
         String contentType = headers.stream()
                 .filter(h -> h.name().equalsIgnoreCase("Content-Type"))
                 .map(ParsedHeader::value)
@@ -150,6 +160,7 @@ public class CurlCommandParser {
                 .uri(baseUri)
                 .contentType(contentType)
                 .headers(nonContentTypeHeaders)
+                .pathVariables(pathVariables)
                 .queryParameters(queryParameters)
                 .bodyParameters(body.parameters())
                 .requestBodyTemplate(body.template())
@@ -168,6 +179,20 @@ public class CurlCommandParser {
     private BodyTemplate deriveBodyTemplate(String rawBody, List<String> warnings) {
         if (rawBody == null || rawBody.isBlank()) {
             return new BodyTemplate(null, List.of());
+        }
+        // Explicit {{param}} placeholders: keep the body exactly as written and
+        // declare each placeholder as a required parameter,
+        // e.g. -d '{"title": "{{title}}", "userId": {{userId}}}'
+        java.util.regex.Matcher placeholderMatcher =
+                java.util.regex.Pattern.compile("\\{\\{([a-zA-Z][a-zA-Z0-9_]*)}}").matcher(rawBody);
+        java.util.LinkedHashSet<String> placeholders = new java.util.LinkedHashSet<>();
+        while (placeholderMatcher.find()) {
+            placeholders.add(placeholderMatcher.group(1));
+        }
+        if (!placeholders.isEmpty()) {
+            return new BodyTemplate(rawBody, placeholders.stream()
+                    .map(name -> new ParsedParameter(name, "string", null, true))
+                    .toList());
         }
         try {
             JsonNode root = objectMapper.readTree(rawBody);

@@ -13,6 +13,8 @@ public record GroupResponse(
         String mcpKey,
         @Schema(description = "Group-scoped MCP SSE endpoint path", example = "/mcp/group/ab12cd34.../sse")
         String mcpSseUrl,
+        @Schema(description = "Tool-name prefix applied on this group's MCP endpoint")
+        String mcpToolPrefix,
         String displayName,
         String description,
         String businessArea,

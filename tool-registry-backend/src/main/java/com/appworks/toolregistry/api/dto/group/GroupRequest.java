@@ -41,6 +41,12 @@ public record GroupRequest(
 
         @Schema(description = "Markdown documentation")
         @Size(max = 50000)
-        String documentation
+        String documentation,
+
+        @Schema(description = "Optional tool-name prefix on this group's MCP endpoint — avoids duplicate tool names when clients connect to several group endpoints sharing tools",
+                example = "orders")
+        @Pattern(regexp = "^[a-z][a-z0-9_]{0,19}$",
+                message = "must start with a lowercase letter and contain only lowercase letters, digits and underscores (max 20 chars)")
+        String mcpToolPrefix
 ) {
 }

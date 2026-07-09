@@ -74,7 +74,9 @@ public class McpRegistrySynchronizer {
     @EventListener
     public void onGroupChanged(GroupChangedEvent event) {
         switch (event.type()) {
-            case DELETED, KEY_REGENERATED -> {
+            case DELETED, KEY_REGENERATED, CONFIG_CHANGED -> {
+                // Close the live server; it is lazily rebuilt with fresh
+                // settings on the next consumer connection.
                 if (event.previousMcpKey() != null) {
                     groupMcpServerRegistry.remove(event.previousMcpKey());
                 }

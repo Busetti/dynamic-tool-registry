@@ -83,8 +83,14 @@ public class GroupService {
         if (!group.getName().equals(request.name()) && groupRepository.existsByName(request.name())) {
             throw new DuplicateResourceException("Group with name '%s' already exists".formatted(request.name()));
         }
+        String previousPrefix = group.getMcpToolPrefix();
         groupMapper.updateEntity(request, group);
         Group saved = groupRepository.save(group);
+        if (!java.util.Objects.equals(previousPrefix, saved.getMcpToolPrefix())) {
+            // Live group server must rebuild so tools are re-published under the new names.
+            eventPublisher.publishEvent(
+                    com.appworks.toolregistry.application.event.GroupChangedEvent.configChanged(saved));
+        }
         log.info("Updated group '{}' ({})", saved.getName(), saved.getId());
         return groupMapper.toResponse(saved, toolRepository.countByGroupIdsContaining(id));
     }

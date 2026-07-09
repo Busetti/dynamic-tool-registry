@@ -10,7 +10,9 @@ public record GroupChangedEvent(ChangeType type, Group group, String previousMcp
 
     public enum ChangeType {
         DELETED,
-        KEY_REGENERATED
+        KEY_REGENERATED,
+        /** MCP-relevant settings changed (e.g. tool prefix) — the live group server must rebuild. */
+        CONFIG_CHANGED
     }
 
     public static GroupChangedEvent deleted(Group group) {
@@ -19,5 +21,9 @@ public record GroupChangedEvent(ChangeType type, Group group, String previousMcp
 
     public static GroupChangedEvent keyRegenerated(Group group, String previousMcpKey) {
         return new GroupChangedEvent(ChangeType.KEY_REGENERATED, group, previousMcpKey);
+    }
+
+    public static GroupChangedEvent configChanged(Group group) {
+        return new GroupChangedEvent(ChangeType.CONFIG_CHANGED, group, group.getMcpKey());
     }
 }

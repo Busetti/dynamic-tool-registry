@@ -38,8 +38,16 @@ public class ToolDefinitionFactory {
     private final ResponseProcessor responseProcessor;
 
     public McpServerFeatures.SyncToolSpecification createSpecification(Tool tool) {
+        return createSpecification(tool, tool.getToolName());
+    }
+
+    /**
+     * @param exposedName the name the tool is published under — group MCP
+     *                    endpoints may prefix it to avoid cross-server clashes
+     */
+    public McpServerFeatures.SyncToolSpecification createSpecification(Tool tool, String exposedName) {
         McpSchema.Tool mcpTool = new McpSchema.Tool(
-                tool.getToolName(),
+                exposedName,
                 composeDescription(tool),
                 buildInputSchema(tool));
 

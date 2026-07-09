@@ -41,8 +41,14 @@ public class GroupMcpServerRegistry {
     public record GroupMcpServer(
             String groupId,
             String mcpKey,
+            String toolPrefix,
             McpSyncServer server,
             RouterFunction<ServerResponse> routerFunction) {
+
+        /** The name a tool is published under on this group's endpoint. */
+        String exposedName(String toolName) {
+            return toolPrefix == null || toolPrefix.isBlank() ? toolName : toolPrefix + "_" + toolName;
+        }
     }
 
     private final ObjectMapper objectMapper;
@@ -78,7 +84,7 @@ public class GroupMcpServerRegistry {
                     .build();
 
             GroupMcpServer groupServer = new GroupMcpServer(
-                    group.getId(), key, server, transport.getRouterFunction());
+                    group.getId(), key, group.getMcpToolPrefix(), server, transport.getRouterFunction());
             List<Tool> tools = toolRepository.findByStatusAndGroupIdsContaining(ToolStatus.ACTIVE, group.getId());
             tools.forEach(tool -> addToolTo(groupServer, tool));
             log.info("Started group MCP server for '{}' ({} tools) at {}/sse",
@@ -110,7 +116,7 @@ public class GroupMcpServerRegistry {
             GroupMcpServer groupServer = servers.get(key);
             if (groupServer != null) {
                 if (current.contains(key)) {
-                    groupServer.server().removeTool(tool.getToolName());
+                    groupServer.server().removeTool(groupServer.exposedName(tool.getToolName()));
                 }
                 addToolTo(groupServer, tool);
             }
@@ -149,7 +155,8 @@ public class GroupMcpServerRegistry {
 
     private void addToolTo(GroupMcpServer groupServer, Tool tool) {
         try {
-            groupServer.server().addTool(toolDefinitionFactory.createSpecification(tool));
+            groupServer.server().addTool(toolDefinitionFactory.createSpecification(
+                    tool, groupServer.exposedName(tool.getToolName())));
             toolRegistrations.computeIfAbsent(tool.getToolName(), k -> ConcurrentHashMap.newKeySet())
                     .add(groupServer.mcpKey());
         } catch (Exception e) {
@@ -162,7 +169,7 @@ public class GroupMcpServerRegistry {
         GroupMcpServer groupServer = servers.get(mcpKey);
         if (groupServer != null) {
             try {
-                groupServer.server().removeTool(toolName);
+                groupServer.server().removeTool(groupServer.exposedName(toolName));
             } catch (Exception e) {
                 log.warn("Failed to remove tool '{}' from group server {}: {}", toolName, mcpKey, e.getMessage());
             }

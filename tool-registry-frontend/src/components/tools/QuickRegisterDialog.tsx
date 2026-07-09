@@ -104,7 +104,8 @@ export default function QuickRegisterDialog({ open, onClose }: QuickRegisterDial
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
           Paste a curl command — method, URL, headers, query parameters and JSON body are extracted
-          automatically. Fill in the mandatory details and register.
+          automatically. Use {'{var}'} in the URL path and {'{{param}}'} in the body to declare
+          parameters the AI can fill, e.g. …/users/{'{userId}'}. Fill in the mandatory details and register.
         </Typography>
 
         <MonacoJsonEditor language="shell" value={curl} onChange={setCurl} height={130} />
@@ -187,6 +188,7 @@ export default function QuickRegisterDialog({ open, onClose }: QuickRegisterDial
             </Stack>
             <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap sx={{ mb: 1.5 }}>
               <Chip size="small" label={`${parsed.headers.length} header(s)`} />
+              <Chip size="small" label={`${parsed.pathVariables.length} path var(s)`} />
               <Chip size="small" label={`${parsed.queryParameters.length} query param(s)`} />
               <Chip size="small" label={`${parsed.bodyParameters.length} body param(s)`} />
               {parsed.headers.some((h) => h.sensitive) && (

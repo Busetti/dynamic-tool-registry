@@ -154,6 +154,9 @@ export default function GroupDetailPage() {
               </Stack>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
                 Consumers connecting with this key see only this group's ACTIVE tools.
+                {group.mcpToolPrefix
+                  ? ` Tools are exposed as ${group.mcpToolPrefix}_<toolName>.`
+                  : ''}
               </Typography>
               <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mb: 1.5 }}>
                 <Typography

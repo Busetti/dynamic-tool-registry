@@ -72,7 +72,7 @@ public class ToolService {
                                 h.name(), h.value(), null, false, h.sensitive()))
                         .toList(),
                 toParameterDtos(parsed.queryParameters()),
-                List.of(),
+                toParameterDtos(parsed.pathVariables()),
                 toParameterDtos(parsed.bodyParameters()),
                 parsed.requestBodyTemplate());
 

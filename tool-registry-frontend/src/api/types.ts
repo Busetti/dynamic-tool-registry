@@ -17,6 +17,7 @@ export interface Group {
   name: string;
   mcpKey?: string | null;
   mcpSseUrl?: string | null;
+  mcpToolPrefix?: string | null;
   displayName: string;
   description?: string;
   businessArea?: string;
@@ -38,6 +39,7 @@ export interface GroupRequest {
   owner?: string;
   tags?: string[];
   documentation?: string;
+  mcpToolPrefix?: string | null;
 }
 
 export interface ToolParameter {
@@ -319,6 +321,7 @@ export interface ParsedCurl {
   uri: string;
   contentType?: string | null;
   headers: { name: string; value: string; sensitive: boolean }[];
+  pathVariables: { name: string; type: string; defaultValue?: string | null; required: boolean }[];
   queryParameters: { name: string; type: string; defaultValue?: string | null; required: boolean }[];
   bodyParameters: { name: string; type: string; defaultValue?: string | null; required: boolean }[];
   requestBodyTemplate?: string | null;

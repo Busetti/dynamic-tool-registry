@@ -29,6 +29,11 @@ const groupSchema = z.object({
   owner: z.string().max(200).optional(),
   tags: z.array(z.string().max(50)).optional(),
   documentation: z.string().max(50000).optional(),
+  mcpToolPrefix: z
+    .string()
+    .regex(/^[a-z][a-z0-9_]{0,19}$/, 'Lowercase letters, digits, underscores; must start with a letter')
+    .optional()
+    .or(z.literal('')),
 });
 
 type GroupFormValues = z.infer<typeof groupSchema>;
@@ -63,13 +68,15 @@ export default function GroupFormDialog({ open, group, onClose }: GroupFormDialo
               owner: group.owner ?? '',
               tags: group.tags ?? [],
               documentation: group.documentation ?? '',
+              mcpToolPrefix: group.mcpToolPrefix ?? '',
             }
-          : { name: '', displayName: '', description: '', businessArea: '', teamName: '', owner: '', tags: [], documentation: '' },
+          : { name: '', displayName: '', description: '', businessArea: '', teamName: '', owner: '', tags: [], documentation: '', mcpToolPrefix: '' },
       );
     }
   }, [open, group, reset]);
 
-  const onSubmit = handleSubmit(async (values) => {
+  const onSubmit = handleSubmit(async (rawValues) => {
+    const values = { ...rawValues, mcpToolPrefix: rawValues.mcpToolPrefix || undefined };
     try {
       if (isEdit) {
         await updateGroup.mutateAsync(values);
@@ -150,6 +157,26 @@ export default function GroupFormDialog({ open, group, onClose }: GroupFormDialo
               control={control}
               render={({ field }) => (
                 <TextField {...field} label="Owner" placeholder="jane.doe@corp.com" fullWidth />
+              )}
+            />
+          </Grid>
+          <Grid size={12}>
+            <Controller
+              name="mcpToolPrefix"
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label="MCP tool prefix (optional)"
+                  placeholder="orders"
+                  fullWidth
+                  error={!!fieldState.error}
+                  helperText={
+                    fieldState.error?.message ??
+                    "Tools on this group's MCP endpoint are exposed as prefix_toolName — set different prefixes when clients connect to several groups sharing tools"
+                  }
+                  InputProps={{ sx: { fontFamily: '"JetBrains Mono", monospace', fontSize: 13.5 } }}
+                />
               )}
             />
           </Grid>

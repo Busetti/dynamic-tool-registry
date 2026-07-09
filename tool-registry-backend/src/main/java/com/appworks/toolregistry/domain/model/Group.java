@@ -39,6 +39,13 @@ public class Group {
      */
     private String mcpKey;
 
+    /**
+     * Optional prefix for tool names on this group's MCP endpoint (e.g. "orders"
+     * exposes {@code orders_get_user}). Lets IDE clients connect to multiple
+     * group endpoints that share tools without duplicate-name collisions.
+     */
+    private String mcpToolPrefix;
+
     private String displayName;
     private String description;
     private String businessArea;
